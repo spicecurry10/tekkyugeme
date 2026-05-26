@@ -1075,6 +1075,7 @@
     line-height: 1.25;
     font-weight: 1000;
     margin: 4px 0 16px;
+    white-space: pre-line;
   }
 
   .choices {
@@ -1094,6 +1095,7 @@
     border: 4px solid #25231f;
     box-shadow: 0 7px 0 rgba(37,35,31,0.18);
     padding: 12px;
+    white-space: pre-line;
   }
 
   .choice:active {
@@ -1521,7 +1523,7 @@
 
 <script>
 (function() {
-  var STORE_KEY = "gen_nurie_quiz_v2";
+  var STORE_KEY = "gen_nurie_quiz_v3";
   var palette = ["#ffd84a", "#2f2d28", "#8a8172", "#ef5b45", "#5eb7d7"];
   var paintTools = [
     { color: "#ffd84a" },
@@ -1558,9 +1560,9 @@
     math_add: "たしざん",
     math_sub: "ひきざん",
     number_sense: "かずの感覚",
-    kana: "ひらがな",
-    vocab: "ことば",
-    reading: "文のりかい"
+    kana: "えあて",
+    vocab: "なかま・いろ",
+    reading: "きいてえらぶ"
   };
 
   var data = loadData();
@@ -1702,6 +1704,17 @@
     tone(freq * 2.08, start + 0.036, duration * 0.48, "sine", (volume || 0.08) * 0.55);
   }
 
+  function rumble(start, duration, volume) {
+    if (!audioCtx) return;
+    var steps = 9;
+    for (var i = 0; i < steps; i++) {
+      var t = start + i * 0.105;
+      var freq = 78 - i * 4 + rand(-3, 3);
+      thump(freq, t, 0.18, (volume || 0.12) * (1 - i / (steps + 2)));
+    }
+    crash(start + 0.12, duration, (volume || 0.12) * 0.9);
+  }
+
   function playEffect(kind) {
     try {
       if (!audioUnlocked) return;
@@ -1714,13 +1727,17 @@
         tone(1760, now + 0.13, 0.22, "sine", 0.18);
         tone(2640, now + 0.19, 0.18, "triangle", 0.08);
       } else if (kind === "smash") {
-        thump(150, now, 0.12, 0.22);
-        thump(92, now + 0.045, 0.32, 0.28);
-        thump(58, now + 0.12, 0.45, 0.22);
-        crash(now + 0.015, 0.42, 0.34);
-        crash(now + 0.16, 0.34, 0.22);
-        metalClang(520, now + 0.02, 0.18, 0.07);
-        metalClang(310, now + 0.13, 0.22, 0.06);
+        thump(170, now, 0.10, 0.28);
+        thump(96, now + 0.035, 0.36, 0.34);
+        thump(54, now + 0.13, 0.62, 0.30);
+        crash(now + 0.005, 0.55, 0.42);
+        crash(now + 0.13, 0.48, 0.34);
+        crash(now + 0.32, 0.72, 0.20);
+        metalClang(760, now + 0.015, 0.22, 0.10);
+        metalClang(520, now + 0.07, 0.18, 0.08);
+        metalClang(330, now + 0.18, 0.28, 0.08);
+        metalClang(240, now + 0.38, 0.32, 0.06);
+        rumble(now + 0.24, 0.95, 0.18);
       } else if (kind === "wrong") {
         tone(330, now, 0.12, "triangle", 0.08);
         tone(247, now + 0.11, 0.16, "triangle", 0.07);
@@ -2330,126 +2347,110 @@
 
   function makeEasyQuestion() {
     if (Math.random() < 0.5) {
-      var a = rand(2, 7);
-      var b = rand(1, 6);
-      var ans = a + b;
-      return buildQuestion("さんすう", "math_add", a + " + " + b + " = ？", ans, "あわせると " + ans + " だね。");
+      return makeCountingQuestion();
     }
     return makeJapaneseQuestion();
   }
 
   function makeMathQuestion() {
     var r = Math.random();
-    if (r < 0.35) return makeAddQuestion();
-    if (r < 0.65) return makeSubQuestion();
-    if (r < 0.82) return makeNumberSenseQuestion();
+    if (r < 0.34) return makeCountingQuestion();
+    if (r < 0.58) return makeAddQuestion();
+    if (r < 0.76) return makeSubQuestion();
+    if (r < 0.9) return makeNumberSenseQuestion();
     return makeWordMathQuestion();
   }
 
   function makeAddQuestion() {
-    var max = skillStrong("math_add") ? 10 : 8;
-    var a = rand(1, max);
-    var b = rand(1, max);
-    if (a + b > 20) b = 20 - a;
-    if (b < 1) b = 1;
+    var a = rand(1, 4);
+    var b = rand(1, 4);
     var ans = a + b;
-    return buildQuestion("さんすう", "math_add", a + " + " + b + " = ？", ans, a + " と " + b + " を あわせると " + ans + "。");
+    return buildQuestion("かず", "math_add", "ぜんぶで いくつ？\n" + repeatIcon("🔩", a) + "  +  " + repeatIcon("🔩", b), ans, "ぜんぶで " + ans + "こ だね。");
   }
 
   function makeSubQuestion() {
-    var max = skillStrong("math_sub") ? 20 : 15;
-    var a = rand(5, max);
-    var b = rand(1, a - 1);
+    var a = rand(3, 7);
+    var b = rand(1, Math.min(3, a - 1));
     var ans = a - b;
-    return buildQuestion("さんすう", "math_sub", a + " - " + b + " = ？", ans, a + " から " + b + " を とると " + ans + "。");
+    return buildQuestion("かず", "math_sub", "のこりは いくつ？\n" + repeatIcon("🧱", a) + "\nつかった " + repeatIcon("🧱", b), ans, "のこりは " + ans + "こ だね。");
   }
 
   function makeNumberSenseQuestion() {
-    var a = rand(1, 30);
-    var b = rand(1, 30);
-    while (b === a) b = rand(1, 30);
+    var a = rand(1, 9);
+    var b = rand(1, 9);
+    while (b === a) b = rand(1, 9);
     var bigger = Math.max(a, b);
     var smaller = Math.min(a, b);
     if (Math.random() < 0.5) {
       return {
-        label: "かず",
+        label: "おおい",
         skill: "number_sense",
-        prompt: "おおきい かずは どっち？",
-        choices: shuffle([String(a), String(b)]),
-        answer: String(bigger),
-        explain: bigger + " のほうが おおきいね。"
+        prompt: "おおい ほうは どっち？",
+        choices: shuffle([numberChoice(a, "🔩"), numberChoice(b, "🔩")]),
+        answer: numberChoice(bigger, "🔩"),
+        explain: bigger + "この ほうが おおいね。"
       };
     }
     return {
-      label: "かず",
+      label: "すくない",
       skill: "number_sense",
-      prompt: "ちいさい かずは どっち？",
-      choices: shuffle([String(a), String(b)]),
-      answer: String(smaller),
-      explain: smaller + " のほうが ちいさいね。"
+      prompt: "すくない ほうは どっち？",
+      choices: shuffle([numberChoice(a, "🧱"), numberChoice(b, "🧱")]),
+      answer: numberChoice(smaller, "🧱"),
+      explain: smaller + "この ほうが すくないね。"
     };
   }
 
   function makeWordMathQuestion() {
-    var a = rand(4, 12);
-    var b = rand(2, 7);
+    var a = rand(2, 5);
+    var b = rand(1, 3);
     if (Math.random() < 0.5) {
       var ans = a + b;
-      return buildQuestion("ぶんしょうだい", "math_add", "ブロックが " + a + "こ。さらに " + b + "こ。ぜんぶで？", ans, "ぜんぶで " + ans + "こ だね。");
+      return buildQuestion("かず", "math_add", "ダンプに のせるよ。\n" + repeatIcon("🪨", a) + "  と  " + repeatIcon("🪨", b) + "\nぜんぶは？", ans, "ぜんぶで " + ans + "こ だね。");
     } else {
       if (b >= a) b = a - 1;
       var ans2 = a - b;
-      return buildQuestion("ぶんしょうだい", "math_sub", "ねじが " + a + "こ。" + b + "こ つかった。のこりは？", ans2, "のこりは " + ans2 + "こ だね。");
+      return buildQuestion("かず", "math_sub", "ねじを つかうよ。\n" + repeatIcon("⚙️", a) + "\nつかった " + repeatIcon("⚙️", b), ans2, "のこりは " + ans2 + "こ だね。");
     }
   }
 
   function makeJapaneseQuestion() {
     var r = Math.random();
-    if (r < 0.34) return makeKanaQuestion();
-    if (r < 0.67) return makeVocabQuestion();
+    if (r < 0.36) return makeKanaQuestion();
+    if (r < 0.72) return makeVocabQuestion();
     return makeReadingQuestion();
   }
 
   function makeKanaQuestion() {
-    var words = [
-      ["ねこ", "ね", "こ"], ["いぬ", "い", "ぬ"], ["さくら", "さ", "ら"], ["りんご", "り", "ご"],
-      ["くるま", "く", "ま"], ["ほし", "ほ", "し"], ["はな", "は", "な"], ["うさぎ", "う", "ぎ"],
-      ["みかん", "み", "ん"], ["けーき", "け", "き"], ["こうじ", "こ", "じ"], ["てっきゅう", "て", "う"],
-      ["くれーん", "く", "ん"], ["とんかち", "と", "ち"]
+    var items = [
+      ["🐱\nねこ"], ["🐶\nいぬ"], ["🚗\nくるま"], ["🍎\nりんご"],
+      ["🌸\nはな"], ["⭐\nほし"], ["🏗️\nくれーん"], ["🔨\nとんかち"]
     ];
-    var item = words[rand(0, words.length - 1)];
-    var askLast = Math.random() < 0.45;
-    var answer = askLast ? item[2] : item[1];
-    var all = ["あ","い","う","え","お","か","き","く","け","こ","さ","し","す","せ","そ","た","ち","て","と","ね","ぬ","り","は","ほ","ま","み","ん","じ","ご"];
-    var choices = [answer];
-    while (choices.length < 4) {
-      var c = all[rand(0, all.length - 1)];
-      if (choices.indexOf(c) < 0) choices.push(c);
-    }
+    var target = items[rand(0, items.length - 1)][0];
+    var choices = [target];
+    while (choices.length < 4) addUniqueChoice(choices, items[rand(0, items.length - 1)][0]);
     return {
-      label: "ひらがな",
+      label: "えあて",
       skill: "kana",
-      prompt: "「" + item[0] + "」の " + (askLast ? "さいご" : "はじめ") + "の もじは？",
+      prompt: "おなじ えは どれ？\n" + target,
       choices: shuffle(choices),
-      answer: answer,
-      explain: "「" + item[0] + "」の " + (askLast ? "さいご" : "はじめ") + "は「" + answer + "」だね。"
+      answer: target,
+      explain: "おなじ えを えらべたね。"
     };
   }
 
   function makeVocabQuestion() {
     var sets = [
-      { prompt: "「ねこ」と おなじ なかまは？", answer: "いぬ", choices: ["いぬ", "くるま", "けーき", "ぼうし"], explain: "ねこも いぬも どうぶつだね。" },
-      { prompt: "「りんご」と おなじ なかまは？", answer: "みかん", choices: ["みかん", "つくえ", "くつ", "えんぴつ"], explain: "りんごも みかんも くだものだね。" },
-      { prompt: "「あか」と おなじ なかまは？", answer: "あお", choices: ["あお", "ねこ", "ごはん", "はしる"], explain: "あかも あおも いろだね。" },
-      { prompt: "「はしる」と おなじ なかまは？", answer: "とぶ", choices: ["とぶ", "りぼん", "さかな", "みどり"], explain: "はしるも とぶも うごきだね。" },
-      { prompt: "「おはな」は どこに さく？", answer: "にわ", choices: ["にわ", "そら", "うみ", "れいぞうこ"], explain: "おはなは にわや はたけに さくね。" },
-      { prompt: "「くれーん」と おなじ なかまは？", answer: "だんぷ", choices: ["だんぷ", "いちご", "くつ", "えほん"], explain: "くれーんも だんぷも はたらく くるまだね。" },
-      { prompt: "「ながい」の はんたいは？", answer: "みじかい", choices: ["みじかい", "あかい", "おもい", "はやい"], explain: "ながいの はんたいは みじかい だね。" },
-      { prompt: "「うえ」の はんたいは？", answer: "した", choices: ["した", "みぎ", "そと", "まえ"], explain: "うえの はんたいは した だね。" }
+      { prompt: "はたらく くるまは どれ？", answer: "🏗️\nくれーん", choices: ["🏗️\nくれーん", "🍎\nりんご", "🐱\nねこ", "🌸\nはな"], explain: "くれーんは はたらく くるまだね。" },
+      { prompt: "くだものは どれ？", answer: "🍊\nみかん", choices: ["🍊\nみかん", "🚧\nさんかく", "🔨\nとんかち", "🐶\nいぬ"], explain: "みかんは くだものだね。" },
+      { prompt: "どうぶつは どれ？", answer: "🐶\nいぬ", choices: ["🐶\nいぬ", "🧱\nブロック", "🚗\nくるま", "⭐\nほし"], explain: "いぬは どうぶつだね。" },
+      { prompt: "あかい いろは どれ？", answer: "🟥\nあか", choices: ["🟥\nあか", "🟦\nあお", "🟨\nきいろ", "🟩\nみどり"], explain: "あかは これだね。" },
+      { prompt: "まるい かたちは どれ？", answer: "⚫\nまる", choices: ["⚫\nまる", "⬛\nしかく", "🔺\nさんかく", "⭐\nほし"], explain: "まるい かたちを えらべたね。" },
+      { prompt: "こうじで つかうものは どれ？", answer: "🔨\nとんかち", choices: ["🔨\nとんかち", "🍰\nけーき", "🐰\nうさぎ", "🍓\nいちご"], explain: "とんかちは こうじで つかうね。" }
     ];
     var s = sets[rand(0, sets.length - 1)];
     return {
-      label: "ことば",
+      label: "えらぶ",
       skill: "vocab",
       prompt: s.prompt,
       choices: shuffle(s.choices.slice(0)),
@@ -2460,18 +2461,15 @@
 
   function makeReadingQuestion() {
     var qs = [
-      { prompt: "「ねこが ねています。」ねこは なにを してる？", answer: "ねてる", choices: ["ねてる", "とんでる", "ないてる"], explain: "ねこは ねているね。" },
-      { prompt: "「あめが ふっています。」ふっているのは？", answer: "あめ", choices: ["あめ", "ゆき", "はな"], explain: "ふっているのは あめだね。" },
-      { prompt: "「げんは えを かきます。」げんは なにを かく？", answer: "え", choices: ["え", "ごはん", "くつ"], explain: "げんは えを かくね。" },
-      { prompt: "「うさぎが にんじんを たべます。」たべるものは？", answer: "にんじん", choices: ["にんじん", "さかな", "ぼうし"], explain: "うさぎは にんじんを たべるね。" },
-      { prompt: "「ほしが きらきら ひかります。」ひかるのは？", answer: "ほし", choices: ["ほし", "ねこ", "りんご"], explain: "ほしが ひかるね。" },
-      { prompt: "「くれーんが おおきな いしを はこびます。」はこぶものは？", answer: "いし", choices: ["いし", "みず", "はな", "くつ"], explain: "くれーんは いしを はこぶね。" },
-      { prompt: "「あかい ヘルメットを かぶります。」かぶるものは？", answer: "ヘルメット", choices: ["ヘルメット", "ながぐつ", "てぶくろ", "くるま"], explain: "かぶるものは ヘルメットだね。" },
-      { prompt: "「ダンプが すなを はこびました。」なにを はこんだ？", answer: "すな", choices: ["すな", "あめ", "ほん", "りんご"], explain: "ダンプは すなを はこんだね。" }
+      { prompt: "おとなが よむよ：\nねこは どれ？", answer: "🐱\nねこ", choices: ["🐱\nねこ", "🚗\nくるま", "🍎\nりんご"], explain: "ねこを えらべたね。" },
+      { prompt: "おとなが よむよ：\nあおい ものは どれ？", answer: "🟦\nあお", choices: ["🟦\nあお", "🟥\nあか", "🟨\nきいろ"], explain: "あおを えらべたね。" },
+      { prompt: "おとなが よむよ：\nくれーんは どれ？", answer: "🏗️\nくれーん", choices: ["🏗️\nくれーん", "🐶\nいぬ", "🍓\nいちご"], explain: "くれーんを えらべたね。" },
+      { prompt: "おとなが よむよ：\nごはんを たべる どうぐは？", answer: "🥄\nすぷーん", choices: ["🥄\nすぷーん", "🔨\nとんかち", "⭐\nほし"], explain: "すぷーんで たべるね。" },
+      { prompt: "おとなが よむよ：\nそらに あるものは？", answer: "☁️\nくも", choices: ["☁️\nくも", "🧱\nブロック", "🚧\nコーン"], explain: "くもは そらに あるね。" }
     ];
     var q = qs[rand(0, qs.length - 1)];
     return {
-      label: "文のりかい",
+      label: "きいてえらぶ",
       skill: "reading",
       prompt: q.prompt,
       choices: shuffle(q.choices.slice(0)),
@@ -2481,16 +2479,18 @@
   }
 
   function buildQuestion(label, skill, prompt, numericAnswer, explain) {
-    var ans = String(numericAnswer);
+    var ans = numberChoice(numericAnswer, "🔩");
     var choices = [ans];
     var delta = [-2, -1, 1, 2, 3, -3];
     for (var i = 0; i < delta.length && choices.length < 4; i++) {
       var v = numericAnswer + delta[i];
-      if (v >= 0 && choices.indexOf(String(v)) < 0) choices.push(String(v));
+      var option = numberChoice(v, "🔩");
+      if (v >= 0 && choices.indexOf(option) < 0) choices.push(option);
     }
     while (choices.length < 4) {
-      var r = rand(0, Math.max(20, numericAnswer + 6));
-      if (choices.indexOf(String(r)) < 0) choices.push(String(r));
+      var r = rand(0, 10);
+      var option2 = numberChoice(r, "🔩");
+      if (choices.indexOf(option2) < 0) choices.push(option2);
     }
     return {
       label: label,
@@ -2500,6 +2500,27 @@
       answer: ans,
       explain: explain
     };
+  }
+
+  function makeCountingQuestion() {
+    var icons = ["🔩", "🧱", "⚙️", "🪨"];
+    var icon = icons[rand(0, icons.length - 1)];
+    var count = rand(1, 8);
+    return buildQuestion("かず", "number_sense", "いくつ ある？\n" + repeatIcon(icon, count), count, count + "こ あるね。");
+  }
+
+  function numberChoice(n, icon) {
+    return String(n) + "\n" + (n > 0 ? repeatIcon(icon || "🔩", n) : "なし");
+  }
+
+  function repeatIcon(icon, count) {
+    var out = "";
+    for (var i = 0; i < count; i++) out += icon;
+    return out;
+  }
+
+  function addUniqueChoice(list, item) {
+    if (list.indexOf(item) < 0) list.push(item);
   }
 
   function skillStrong(skill) {
