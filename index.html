@@ -765,6 +765,22 @@
       linear-gradient(#8a8172, #5d554b);
   }
 
+  .demolition-scene::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 7;
+    pointer-events: none;
+    opacity: 0;
+    background:
+      radial-gradient(circle at 72% var(--impact-y, 25%), rgba(255,255,255,0.95) 0 8%, rgba(255,216,74,0.75) 8% 14%, transparent 26%),
+      linear-gradient(90deg, transparent 0 58%, rgba(255,255,255,0.42) 58% 65%, transparent 75%);
+  }
+
+  .demolition-scene.smashing::after {
+    animation: impactFlash 520ms ease-out;
+  }
+
   .wrecking-crane {
     position: absolute;
     left: 18px;
@@ -829,6 +845,10 @@
     animation: wreckSwing 620ms cubic-bezier(.18,.86,.24,1.02);
   }
 
+  .demolition-scene.smashing .building-wrap {
+    animation: buildingQuake 640ms cubic-bezier(.22,.86,.26,1);
+  }
+
   .demolition-scene.smash-ready {
     cursor: pointer;
   }
@@ -845,9 +865,27 @@
 
   @keyframes wreckSwing {
     0% { transform: translateX(0) rotate(0deg); }
-    42% { transform: translateX(118px) rotate(-18deg); }
-    62% { transform: translateX(94px) rotate(-10deg); }
+    36% { transform: translateX(126px) rotate(-22deg); }
+    48% { transform: translateX(118px) rotate(-18deg) scale(1.08); }
+    68% { transform: translateX(76px) rotate(8deg); }
     100% { transform: translateX(0) rotate(0deg); }
+  }
+
+  @keyframes buildingQuake {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    14% { transform: translate(-6px, 2px) rotate(-1.8deg); }
+    28% { transform: translate(8px, -2px) rotate(2.4deg); }
+    42% { transform: translate(-5px, 4px) rotate(-1.4deg); }
+    56% { transform: translate(6px, 1px) rotate(1deg); }
+    72% { transform: translate(-3px, 0) rotate(-0.6deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+  }
+
+  @keyframes impactFlash {
+    0% { opacity: 0; transform: scale(0.75); }
+    12% { opacity: 1; transform: scale(1.06); }
+    36% { opacity: 0.55; }
+    100% { opacity: 0; transform: scale(1.22); }
   }
 
   .building-wrap {
@@ -871,7 +909,7 @@
     border-bottom-width: 3px;
     background: var(--floor-color, #8fd3ff);
     box-shadow: inset 0 -8px 0 rgba(0,0,0,0.08);
-    transition: transform 360ms ease, opacity 360ms ease, filter 360ms ease;
+    transition: transform 220ms ease, filter 220ms ease;
   }
 
   .building-floor::before {
@@ -885,9 +923,15 @@
   }
 
   .building-floor.broken {
-    transform: translate(28px, 36px) rotate(12deg) scale(0.88);
-    opacity: 0;
+    animation: floorBlast 620ms cubic-bezier(.12,.76,.22,1) forwards;
     filter: saturate(0.7);
+  }
+
+  @keyframes floorBlast {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+    18% { transform: translate(-12px, -8px) rotate(-5deg) scale(1.08); opacity: 1; }
+    46% { transform: translate(48px, 36px) rotate(18deg) scale(0.86); opacity: 0.72; }
+    100% { transform: translate(74px, 82px) rotate(28deg) scale(0.46); opacity: 0; }
   }
 
   .rubble {
@@ -903,18 +947,47 @@
   .rubble-piece {
     position: absolute;
     bottom: 0;
-    width: 22px;
-    height: 18px;
-    border: 3px solid #4f4654;
+    width: var(--w, 22px);
+    height: var(--h, 18px);
+    border: var(--border, 3px) solid var(--edge, #4f4654);
     border-radius: 5px;
-    background: #a9b8c8;
+    background: var(--piece-color, #a9b8c8);
+    opacity: var(--alpha, 1);
     transform: translate(var(--x), var(--y)) rotate(var(--r));
-    animation: rubblePop 460ms ease-out;
+    animation: rubblePop var(--dur, 780ms) cubic-bezier(.15,.83,.27,1.02);
   }
 
   @keyframes rubblePop {
-    0% { transform: translate(10px, -52px) rotate(0deg) scale(0.5); opacity: 0; }
-    100% { transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(1); opacity: 1; }
+    0% { transform: translate(var(--start-x, 24px), var(--start-y, -92px)) rotate(0deg) scale(0.35); opacity: 0; }
+    16% { opacity: var(--alpha, 1); }
+    72% { transform: translate(var(--x), var(--mid-y, -28px)) rotate(var(--r)) scale(var(--scale, 1)); opacity: var(--alpha, 1); }
+    100% { transform: translate(var(--x), var(--y)) rotate(var(--r2, var(--r))) scale(var(--scale, 1)); opacity: var(--end-alpha, 1); }
+  }
+
+  .rubble-piece.dust {
+    border: 0;
+    border-radius: 50%;
+    filter: blur(1px);
+    animation-name: dustPuff;
+  }
+
+  .rubble-piece.spark {
+    border: 0;
+    border-radius: 999px;
+    box-shadow: 0 0 12px rgba(255, 216, 74, 0.85);
+    animation-name: sparkFly;
+  }
+
+  @keyframes dustPuff {
+    0% { transform: translate(var(--start-x, 24px), var(--start-y, -92px)) scale(0.25); opacity: 0; }
+    20% { opacity: 0.78; }
+    100% { transform: translate(var(--x), var(--y)) scale(var(--scale, 1.8)); opacity: 0; }
+  }
+
+  @keyframes sparkFly {
+    0% { transform: translate(var(--start-x, 24px), var(--start-y, -92px)) rotate(0deg) scale(0.4); opacity: 0; }
+    12% { opacity: 1; }
+    100% { transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(0.2); opacity: 0; }
   }
 
   .coloring-board {
@@ -1976,7 +2049,8 @@
     var ballTop = [58, 48, 38, 28, 18][floorIndex] || 18;
     var cableTop = [14, 12, 10, 8, 6][floorIndex] || 6;
     var cableHeight = Math.max(12, ballTop - cableTop + 4);
-    return "--ball-top:" + ballTop + "%;--cable-top:" + cableTop + "%;--cable-height:" + cableHeight + "%;";
+    var impactY = [66, 56, 46, 36, 26][floorIndex] || 26;
+    return "--ball-top:" + ballTop + "%;--cable-top:" + cableTop + "%;--cable-height:" + cableHeight + "%;--impact-y:" + impactY + "%;";
   }
 
   function aimWreckingBall(scene, floorIndex) {
@@ -2021,13 +2095,58 @@
   function addRubble(scene, partIndex) {
     var rubble = scene.querySelector(".rubble");
     if (!rubble) return;
-    for (var i = 0; i < 4; i++) {
+    var floorY = -18 - partIndex * 22;
+    var pieceColors = ["#a9b8c8", "#7f8c99", "#c3b08d", "#6f6660", "#d7c47a"];
+    for (var i = 0; i < 13; i++) {
       var piece = document.createElement("span");
       piece.className = "rubble-piece";
-      piece.style.setProperty("--x", (12 + partIndex * 10 + i * 18) + "px");
-      piece.style.setProperty("--y", (2 - (i % 2) * 9) + "px");
-      piece.style.setProperty("--r", ((i * 23 + partIndex * 11) % 48 - 24) + "deg");
+      var x = -28 + i * 13 + rand(-8, 8) + partIndex * 6;
+      var y = 8 + rand(-5, 18);
+      var startX = 54 + rand(-12, 16);
+      var startY = floorY + rand(-18, 10);
+      var rot = rand(-120, 120);
+      piece.style.setProperty("--start-x", startX + "px");
+      piece.style.setProperty("--start-y", startY + "px");
+      piece.style.setProperty("--x", x + "px");
+      piece.style.setProperty("--mid-y", (floorY - rand(18, 64)) + "px");
+      piece.style.setProperty("--y", y + "px");
+      piece.style.setProperty("--r", rot + "deg");
+      piece.style.setProperty("--r2", (rot + rand(-140, 140)) + "deg");
+      piece.style.setProperty("--w", rand(12, 27) + "px");
+      piece.style.setProperty("--h", rand(9, 21) + "px");
+      piece.style.setProperty("--dur", rand(560, 940) + "ms");
+      piece.style.setProperty("--piece-color", pieceColors[rand(0, pieceColors.length - 1)]);
+      piece.style.setProperty("--scale", (rand(75, 125) / 100).toFixed(2));
       rubble.appendChild(piece);
+    }
+    for (var j = 0; j < 7; j++) {
+      var dust = document.createElement("span");
+      dust.className = "rubble-piece dust";
+      dust.style.setProperty("--start-x", (48 + rand(-16, 22)) + "px");
+      dust.style.setProperty("--start-y", (floorY + rand(-18, 12)) + "px");
+      dust.style.setProperty("--x", (rand(-28, 120) + partIndex * 4) + "px");
+      dust.style.setProperty("--y", rand(-34, 20) + "px");
+      dust.style.setProperty("--w", rand(26, 54) + "px");
+      dust.style.setProperty("--h", rand(20, 42) + "px");
+      dust.style.setProperty("--dur", rand(780, 1180) + "ms");
+      dust.style.setProperty("--piece-color", j % 2 ? "#d8d0bd" : "#bfb29a");
+      dust.style.setProperty("--alpha", "0.72");
+      dust.style.setProperty("--scale", (rand(150, 240) / 100).toFixed(2));
+      rubble.appendChild(dust);
+    }
+    for (var k = 0; k < 6; k++) {
+      var spark = document.createElement("span");
+      spark.className = "rubble-piece spark";
+      spark.style.setProperty("--start-x", (58 + rand(-10, 14)) + "px");
+      spark.style.setProperty("--start-y", (floorY + rand(-10, 10)) + "px");
+      spark.style.setProperty("--x", (rand(8, 132) + partIndex * 4) + "px");
+      spark.style.setProperty("--y", rand(-76, -12) + "px");
+      spark.style.setProperty("--w", rand(8, 15) + "px");
+      spark.style.setProperty("--h", rand(3, 6) + "px");
+      spark.style.setProperty("--dur", rand(360, 620) + "ms");
+      spark.style.setProperty("--piece-color", k % 2 ? "#fff3a8" : "#ffb22d");
+      spark.style.setProperty("--r", rand(-80, 80) + "deg");
+      rubble.appendChild(spark);
     }
   }
 
