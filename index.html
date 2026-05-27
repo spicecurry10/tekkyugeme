@@ -801,18 +801,19 @@
   .crane-cable {
     position: absolute;
     left: 73%;
-    top: 14%;
+    top: var(--cable-top, 14%);
     width: 5px;
-    height: 34%;
+    height: var(--cable-height, 34%);
     border-radius: 999px;
     background: #4f4654;
     transform-origin: top center;
+    transition: top 260ms ease, height 260ms ease;
   }
 
   .wrecking-ball {
     position: absolute;
     left: calc(73% - 27px);
-    top: 45%;
+    top: var(--ball-top, 45%);
     width: 58px;
     height: 58px;
     border-radius: 50%;
@@ -820,6 +821,7 @@
       radial-gradient(circle at 32% 28%, rgba(255,255,255,0.82), transparent 18%),
       linear-gradient(135deg, #9aa1aa, #4e5964);
     box-shadow: 0 8px 0 rgba(45,54,62,0.18);
+    transition: top 260ms ease;
   }
 
   .demolition-scene.smashing .crane-cable,
@@ -1954,8 +1956,10 @@
       var brokenFromTop = i >= 5 - brokenCount;
       floors += '<div class="building-floor' + (brokenFromTop ? ' broken' : '') + '" data-floor="' + i + '" style="--floor-color:' + colors[i] + '"></div>';
     }
+    var targetFloor = Math.max(0, 4 - brokenCount);
+    var targetStyle = wreckingBallStyle(targetFloor);
     $(containerId).innerHTML =
-      '<div class="demolition-scene" id="' + containerId + 'Scene">' +
+      '<div class="demolition-scene" id="' + containerId + 'Scene" style="' + targetStyle + '">' +
         '<div class="wrecking-crane" aria-hidden="true">' +
           '<div class="crane-mast"></div><div class="crane-arm"></div><div class="crane-cable"></div><div class="wrecking-ball"></div>' +
         '</div>' +
@@ -1965,6 +1969,22 @@
 
     if (containerId === "gameArt") {
       bindTap($(containerId + "Scene"), handleSceneSmash);
+    }
+  }
+
+  function wreckingBallStyle(floorIndex) {
+    var ballTop = [58, 48, 38, 28, 18][floorIndex] || 18;
+    var cableTop = [14, 12, 10, 8, 6][floorIndex] || 6;
+    var cableHeight = Math.max(12, ballTop - cableTop + 4);
+    return "--ball-top:" + ballTop + "%;--cable-top:" + cableTop + "%;--cable-height:" + cableHeight + "%;";
+  }
+
+  function aimWreckingBall(scene, floorIndex) {
+    var css = wreckingBallStyle(floorIndex).split(";");
+    for (var i = 0; i < css.length; i++) {
+      if (!css[i]) continue;
+      var pair = css[i].split(":");
+      scene.style.setProperty(pair[0], pair[1]);
     }
   }
 
@@ -1983,6 +2003,7 @@
     var scene = $("gameArtScene");
     if (!scene) return;
     var floor = scene.querySelector('[data-floor="' + partIndex + '"]');
+    aimWreckingBall(scene, partIndex);
     scene.classList.remove("smashing");
     void scene.offsetWidth;
     scene.classList.add("smashing");
@@ -2383,7 +2404,10 @@
       session.pendingSmashExplain = q.explain;
       session.smashReady = true;
       var scene = $("gameArtScene");
-      if (scene) scene.classList.add("smash-ready");
+      if (scene) {
+        aimWreckingBall(scene, part);
+        scene.classList.add("smash-ready");
+      }
       $("feedback").textContent = praiseText() + "　鉄球を タップして ビルを こわそう！";
       playEffect("correct");
       sparkle();
