@@ -846,7 +846,7 @@
   }
 
   .demolition-scene.smashing .building-wrap {
-    animation: buildingQuake 640ms cubic-bezier(.22,.86,.26,1);
+    animation: buildingQuake 820ms cubic-bezier(.22,.86,.26,1);
   }
 
   .demolition-scene.smash-ready {
@@ -865,19 +865,21 @@
 
   @keyframes wreckSwing {
     0% { transform: translateX(0) rotate(0deg); }
-    36% { transform: translateX(126px) rotate(-22deg); }
-    48% { transform: translateX(118px) rotate(-18deg) scale(1.08); }
-    68% { transform: translateX(76px) rotate(8deg); }
+    28% { transform: translateX(142px) rotate(-26deg); }
+    42% { transform: translateX(132px) rotate(-20deg) scale(1.16); }
+    56% { transform: translateX(102px) rotate(12deg); }
+    76% { transform: translateX(38px) rotate(-9deg); }
     100% { transform: translateX(0) rotate(0deg); }
   }
 
   @keyframes buildingQuake {
     0% { transform: translate(0, 0) rotate(0deg); }
-    14% { transform: translate(-6px, 2px) rotate(-1.8deg); }
-    28% { transform: translate(8px, -2px) rotate(2.4deg); }
-    42% { transform: translate(-5px, 4px) rotate(-1.4deg); }
-    56% { transform: translate(6px, 1px) rotate(1deg); }
-    72% { transform: translate(-3px, 0) rotate(-0.6deg); }
+    10% { transform: translate(-10px, 3px) rotate(-3.2deg); }
+    20% { transform: translate(13px, -5px) rotate(4.2deg); }
+    31% { transform: translate(-11px, 7px) rotate(-3.4deg); }
+    43% { transform: translate(10px, 4px) rotate(2.4deg); }
+    56% { transform: translate(-7px, -2px) rotate(-1.8deg); }
+    72% { transform: translate(5px, 1px) rotate(1deg); }
     100% { transform: translate(0, 0) rotate(0deg); }
   }
 
@@ -922,16 +924,61 @@
     opacity: 0.95;
   }
 
+  .building-floor::after {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    opacity: 0;
+    background:
+      linear-gradient(118deg, transparent 0 42%, #25231f 42% 45%, transparent 45%),
+      linear-gradient(64deg, transparent 0 55%, #25231f 55% 58%, transparent 58%),
+      linear-gradient(152deg, transparent 0 48%, rgba(255,255,255,0.82) 48% 51%, transparent 51%);
+    pointer-events: none;
+  }
+
+  .building-floor.hit {
+    animation: floorHit 280ms steps(2, end);
+  }
+
+  .building-floor.hit::after {
+    animation: crackFlash 300ms ease-out;
+  }
+
   .building-floor.broken {
-    animation: floorBlast 620ms cubic-bezier(.12,.76,.22,1) forwards;
+    animation: floorBlast 920ms cubic-bezier(.08,.86,.16,1) forwards;
     filter: saturate(0.7);
+  }
+
+  .building-floor.near-hit {
+    animation: nearFloorDrop 680ms cubic-bezier(.2,.8,.28,1);
+  }
+
+  @keyframes floorHit {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    35% { transform: translate(-10px, -4px) rotate(-3deg) scale(1.08); }
+    70% { transform: translate(12px, 5px) rotate(3deg) scale(1.04); }
+    100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  }
+
+  @keyframes crackFlash {
+    0% { opacity: 0; transform: scale(0.82); }
+    30% { opacity: 1; transform: scale(1.08); }
+    100% { opacity: 0; transform: scale(1.22); }
   }
 
   @keyframes floorBlast {
     0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
-    18% { transform: translate(-12px, -8px) rotate(-5deg) scale(1.08); opacity: 1; }
-    46% { transform: translate(48px, 36px) rotate(18deg) scale(0.86); opacity: 0.72; }
-    100% { transform: translate(74px, 82px) rotate(28deg) scale(0.46); opacity: 0; }
+    15% { transform: translate(-24px, -14px) rotate(-11deg) scale(1.18); opacity: 1; }
+    34% { transform: translate(78px, 30px) rotate(34deg) scale(0.95); opacity: 0.88; }
+    62% { transform: translate(-42px, 78px) rotate(-29deg) scale(0.62); opacity: 0.5; }
+    100% { transform: translate(105px, 132px) rotate(54deg) scale(0.28); opacity: 0; }
+  }
+
+  @keyframes nearFloorDrop {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(8px, 9px) rotate(2deg); }
+    50% { transform: translate(-6px, 5px) rotate(-1.2deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
   }
 
   .rubble {
@@ -978,6 +1025,21 @@
     animation-name: sparkFly;
   }
 
+  .rubble-piece.slab {
+    border-width: 4px;
+    border-radius: 7px;
+    box-shadow: inset 0 -6px 0 rgba(0,0,0,0.12), 0 6px 0 rgba(37,35,31,0.16);
+    animation-name: slabCrash;
+  }
+
+  .rubble-piece.shock {
+    border: 6px solid rgba(255, 246, 168, 0.82);
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: 0 0 0 8px rgba(255, 120, 54, 0.18);
+    animation-name: shockBoom;
+  }
+
   @keyframes dustPuff {
     0% { transform: translate(var(--start-x, 24px), var(--start-y, -92px)) scale(0.25); opacity: 0; }
     20% { opacity: 0.78; }
@@ -988,6 +1050,19 @@
     0% { transform: translate(var(--start-x, 24px), var(--start-y, -92px)) rotate(0deg) scale(0.4); opacity: 0; }
     12% { opacity: 1; }
     100% { transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(0.2); opacity: 0; }
+  }
+
+  @keyframes slabCrash {
+    0% { transform: translate(var(--start-x), var(--start-y)) rotate(0deg) scale(0.45); opacity: 0; }
+    12% { opacity: 1; }
+    45% { transform: translate(var(--x), var(--mid-y)) rotate(var(--r)) scale(1.18); opacity: 1; }
+    100% { transform: translate(var(--x), var(--y)) rotate(var(--r2, var(--r))) scale(0.9); opacity: 1; }
+  }
+
+  @keyframes shockBoom {
+    0% { transform: translate(var(--start-x), var(--start-y)) scale(0.15); opacity: 0; }
+    18% { opacity: 0.95; }
+    100% { transform: translate(var(--start-x), var(--start-y)) scale(2.9); opacity: 0; }
   }
 
   .coloring-board {
@@ -2079,10 +2154,21 @@
     var floor = scene.querySelector('[data-floor="' + partIndex + '"]');
     aimWreckingBall(scene, partIndex);
     scene.classList.remove("smashing");
+    var nearby = scene.querySelectorAll(".building-floor");
+    for (var i = 0; i < nearby.length; i++) {
+      nearby[i].classList.remove("hit", "near-hit");
+      if (Math.abs(Number(nearby[i].getAttribute("data-floor")) - partIndex) === 1) {
+        nearby[i].classList.add("near-hit");
+      }
+    }
+    if (floor) floor.classList.add("hit");
     void scene.offsetWidth;
     scene.classList.add("smashing");
     setTimeout(function() {
-      if (floor) floor.classList.add("broken");
+      if (floor) {
+        floor.classList.remove("hit");
+        floor.classList.add("broken");
+      }
       addRubble(scene, partIndex);
       playEffect("smash");
       session.correctParts++;
@@ -2097,7 +2183,34 @@
     if (!rubble) return;
     var floorY = -18 - partIndex * 22;
     var pieceColors = ["#a9b8c8", "#7f8c99", "#c3b08d", "#6f6660", "#d7c47a"];
-    for (var i = 0; i < 13; i++) {
+    for (var s = 0; s < 2; s++) {
+      var shock = document.createElement("span");
+      shock.className = "rubble-piece shock";
+      shock.style.setProperty("--start-x", (54 + s * 18) + "px");
+      shock.style.setProperty("--start-y", (floorY - 8 + s * 5) + "px");
+      shock.style.setProperty("--w", (46 + s * 24) + "px");
+      shock.style.setProperty("--h", (46 + s * 24) + "px");
+      shock.style.setProperty("--dur", (520 + s * 170) + "ms");
+      rubble.appendChild(shock);
+    }
+    for (var slabIndex = 0; slabIndex < 5; slabIndex++) {
+      var slab = document.createElement("span");
+      slab.className = "rubble-piece slab";
+      var slabRot = rand(-160, 160);
+      slab.style.setProperty("--start-x", (50 + rand(-18, 22)) + "px");
+      slab.style.setProperty("--start-y", (floorY + rand(-12, 12)) + "px");
+      slab.style.setProperty("--x", (rand(-54, 148) + partIndex * 5) + "px");
+      slab.style.setProperty("--mid-y", (floorY - rand(50, 110)) + "px");
+      slab.style.setProperty("--y", rand(-4, 42) + "px");
+      slab.style.setProperty("--r", slabRot + "deg");
+      slab.style.setProperty("--r2", (slabRot + rand(-180, 180)) + "deg");
+      slab.style.setProperty("--w", rand(30, 58) + "px");
+      slab.style.setProperty("--h", rand(16, 31) + "px");
+      slab.style.setProperty("--dur", rand(820, 1280) + "ms");
+      slab.style.setProperty("--piece-color", pieceColors[rand(0, pieceColors.length - 1)]);
+      rubble.appendChild(slab);
+    }
+    for (var i = 0; i < 22; i++) {
       var piece = document.createElement("span");
       piece.className = "rubble-piece";
       var x = -28 + i * 13 + rand(-8, 8) + partIndex * 6;
@@ -2114,27 +2227,27 @@
       piece.style.setProperty("--r2", (rot + rand(-140, 140)) + "deg");
       piece.style.setProperty("--w", rand(12, 27) + "px");
       piece.style.setProperty("--h", rand(9, 21) + "px");
-      piece.style.setProperty("--dur", rand(560, 940) + "ms");
+      piece.style.setProperty("--dur", rand(640, 1180) + "ms");
       piece.style.setProperty("--piece-color", pieceColors[rand(0, pieceColors.length - 1)]);
       piece.style.setProperty("--scale", (rand(75, 125) / 100).toFixed(2));
       rubble.appendChild(piece);
     }
-    for (var j = 0; j < 7; j++) {
+    for (var j = 0; j < 14; j++) {
       var dust = document.createElement("span");
       dust.className = "rubble-piece dust";
       dust.style.setProperty("--start-x", (48 + rand(-16, 22)) + "px");
       dust.style.setProperty("--start-y", (floorY + rand(-18, 12)) + "px");
       dust.style.setProperty("--x", (rand(-28, 120) + partIndex * 4) + "px");
       dust.style.setProperty("--y", rand(-34, 20) + "px");
-      dust.style.setProperty("--w", rand(26, 54) + "px");
-      dust.style.setProperty("--h", rand(20, 42) + "px");
-      dust.style.setProperty("--dur", rand(780, 1180) + "ms");
+      dust.style.setProperty("--w", rand(34, 76) + "px");
+      dust.style.setProperty("--h", rand(26, 58) + "px");
+      dust.style.setProperty("--dur", rand(900, 1500) + "ms");
       dust.style.setProperty("--piece-color", j % 2 ? "#d8d0bd" : "#bfb29a");
       dust.style.setProperty("--alpha", "0.72");
       dust.style.setProperty("--scale", (rand(150, 240) / 100).toFixed(2));
       rubble.appendChild(dust);
     }
-    for (var k = 0; k < 6; k++) {
+    for (var k = 0; k < 12; k++) {
       var spark = document.createElement("span");
       spark.className = "rubble-piece spark";
       spark.style.setProperty("--start-x", (58 + rand(-10, 14)) + "px");
