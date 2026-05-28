@@ -781,6 +781,110 @@
     animation: impactFlash 520ms ease-out;
   }
 
+  .sky-hanamaru {
+    position: absolute;
+    left: 9%;
+    top: 8%;
+    width: min(42%, 190px);
+    aspect-ratio: 1 / 1;
+    z-index: 5;
+    display: grid;
+    place-items: center;
+    border: 9px solid #e42f2f;
+    border-radius: 50%;
+    color: #e42f2f;
+    background: rgba(255,255,255,0.16);
+    font-size: clamp(34px, 7vw, 62px);
+    font-weight: 1000;
+    line-height: 0.9;
+    text-align: center;
+    transform: rotate(-10deg) scale(0.84);
+    opacity: 0;
+    box-shadow:
+      inset 0 0 0 5px rgba(228,47,47,0.22),
+      0 7px 0 rgba(37,35,31,0.12);
+    pointer-events: none;
+    animation: hanamaruStamp 720ms cubic-bezier(.18,.86,.24,1.18) forwards;
+  }
+
+  .sky-hanamaru::before,
+  .sky-hanamaru::after {
+    content: "";
+    position: absolute;
+    inset: -16px;
+    border: 5px solid rgba(228,47,47,0.78);
+    border-radius: 43% 57% 49% 51% / 54% 43% 57% 46%;
+  }
+
+  .sky-hanamaru::after {
+    inset: -27px;
+    border-width: 4px;
+    transform: rotate(24deg);
+    opacity: 0.68;
+  }
+
+  .hanamaru-firework {
+    position: absolute;
+    left: var(--fx, 24%);
+    top: var(--fy, 20%);
+    width: 12px;
+    height: 12px;
+    z-index: 6;
+    pointer-events: none;
+  }
+
+  .hanamaru-firework span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--spark-w, 8px);
+    height: var(--spark-h, 8px);
+    border-radius: 999px;
+    background: var(--spark-color, #fff36a);
+    box-shadow: 0 0 10px var(--spark-color, #fff36a);
+    transform: rotate(var(--angle, 0deg)) translateX(0) scale(0.2);
+    transform-origin: left center;
+    opacity: 0;
+    animation: hanamaruFirework var(--dur, 920ms) cubic-bezier(.12,.74,.26,1) forwards;
+    animation-delay: var(--delay, 0ms);
+  }
+
+  .hanamaru-star {
+    position: absolute;
+    left: var(--sx, 30%);
+    top: var(--sy, 24%);
+    z-index: 6;
+    color: var(--star-color, #fff36a);
+    font-size: var(--star-size, 30px);
+    font-weight: 1000;
+    text-shadow: 0 0 10px rgba(255,255,255,0.9), 0 3px 0 rgba(37,35,31,0.18);
+    pointer-events: none;
+    opacity: 0;
+    animation: hanamaruStar 1320ms cubic-bezier(.13,.82,.24,1) forwards;
+    animation-delay: var(--delay, 0ms);
+  }
+
+  @keyframes hanamaruStamp {
+    0% { opacity: 0; transform: rotate(-18deg) scale(1.8); filter: blur(2px); }
+    54% { opacity: 1; transform: rotate(-8deg) scale(0.78); filter: blur(0); }
+    76% { transform: rotate(-11deg) scale(1.05); }
+    100% { opacity: 1; transform: rotate(-10deg) scale(1); }
+  }
+
+  @keyframes hanamaruFirework {
+    0% { opacity: 0; transform: rotate(var(--angle, 0deg)) translateX(0) scale(0.15); }
+    16% { opacity: 1; }
+    70% { opacity: 1; transform: rotate(var(--angle, 0deg)) translateX(var(--dist, 54px)) scale(1); }
+    100% { opacity: 0; transform: rotate(var(--angle, 0deg)) translateX(var(--dist, 54px)) translateY(18px) scale(0.2); }
+  }
+
+  @keyframes hanamaruStar {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.2) rotate(0deg); }
+    22% { opacity: 1; transform: translate(-50%, -50%) scale(1.15) rotate(16deg); }
+    62% { opacity: 1; transform: translate(-50%, -88%) scale(0.95) rotate(-12deg); }
+    100% { opacity: 0; transform: translate(-50%, -138%) scale(0.35) rotate(34deg); }
+  }
+
   .wrecking-crane {
     position: absolute;
     left: 18px;
@@ -2171,6 +2275,13 @@
     tone(freq * 2.08, start + 0.036, duration * 0.48, "sine", (volume || 0.08) * 0.55);
   }
 
+  function trumpet(freq, start, duration, volume) {
+    if (!audioCtx) return;
+    tone(freq, start, duration, "sawtooth", volume || 0.12);
+    tone(freq * 2.01, start + 0.006, duration * 0.82, "square", (volume || 0.12) * 0.38);
+    tone(freq * 3.02, start + 0.014, duration * 0.58, "triangle", (volume || 0.12) * 0.24);
+  }
+
   function rumble(start, duration, volume) {
     if (!audioCtx) return;
     var steps = 9;
@@ -2213,6 +2324,13 @@
         tone(659, now + 0.1, 0.11, "sine", 0.1);
         tone(784, now + 0.2, 0.11, "sine", 0.1);
         tone(1047, now + 0.3, 0.22, "triangle", 0.12);
+      } else if (kind === "hanamaru") {
+        trumpet(523, now, 0.16, 0.11);
+        trumpet(659, now + 0.13, 0.16, 0.12);
+        trumpet(784, now + 0.26, 0.18, 0.13);
+        trumpet(1047, now + 0.43, 0.34, 0.16);
+        tone(1319, now + 0.55, 0.22, "triangle", 0.08);
+        crash(now + 0.12, 0.28, 0.08);
       } else {
         tone(520, now, 0.08, "triangle", 0.08);
         tone(780, now + 0.07, 0.08, "triangle", 0.07);
@@ -2256,8 +2374,10 @@
     }
     var targetFloor = Math.max(0, 4 - brokenCount);
     var targetStyle = wreckingBallStyle(targetFloor);
+    var hanamaru = brokenCount >= 5 ? '<div class="sky-hanamaru" aria-label="はなまる">花丸</div>' : '';
     $(containerId).innerHTML =
       '<div class="demolition-scene" id="' + containerId + 'Scene" style="' + targetStyle + '">' +
+        hanamaru +
         '<div class="wrecking-crane" aria-hidden="true">' +
           '<div class="crane-mast"></div><div class="crane-arm"></div><div class="crane-cable"></div><div class="wrecking-ball"></div>' +
         '</div>' +
@@ -2267,6 +2387,64 @@
 
     if (containerId === "gameArt") {
       bindTap($(containerId + "Scene"), handleSceneSmash);
+    }
+  }
+
+  function addSkyHanamaru(scene) {
+    if (!scene || scene.querySelector(".sky-hanamaru")) return;
+    var mark = document.createElement("div");
+    mark.className = "sky-hanamaru";
+    mark.setAttribute("aria-label", "はなまる");
+    mark.textContent = "花丸";
+    scene.insertBefore(mark, scene.firstChild);
+    addHanamaruFireworks(scene);
+    playEffect("hanamaru");
+  }
+
+  function addHanamaruFireworks(scene) {
+    if (!scene) return;
+    var colors = ["#fff36a", "#ffffff", "#ff4747", "#69e6ff", "#ffd166"];
+    var starColors = ["#fff36a", "#ffffff", "#ff4747", "#69e6ff"];
+    var spots = [
+      { x: 23, y: 18 },
+      { x: 41, y: 13 },
+      { x: 18, y: 34 },
+      { x: 51, y: 29 }
+    ];
+    for (var b = 0; b < spots.length; b++) {
+      var burst = document.createElement("div");
+      burst.className = "hanamaru-firework";
+      burst.style.setProperty("--fx", spots[b].x + "%");
+      burst.style.setProperty("--fy", spots[b].y + "%");
+      for (var i = 0; i < 14; i++) {
+        var spark = document.createElement("span");
+        spark.style.setProperty("--angle", Math.round((360 / 14) * i + rand(-8, 8)) + "deg");
+        spark.style.setProperty("--dist", rand(34, 72) + "px");
+        spark.style.setProperty("--dur", rand(720, 1120) + "ms");
+        spark.style.setProperty("--delay", (b * 110 + rand(0, 80)) + "ms");
+        spark.style.setProperty("--spark-w", rand(5, 12) + "px");
+        spark.style.setProperty("--spark-h", rand(4, 9) + "px");
+        spark.style.setProperty("--spark-color", colors[rand(0, colors.length - 1)]);
+        burst.appendChild(spark);
+      }
+      scene.insertBefore(burst, scene.firstChild);
+      (function(node) {
+        setTimeout(function(){ if (node.parentNode) node.parentNode.removeChild(node); }, 1800);
+      })(burst);
+    }
+    for (var s = 0; s < 16; s++) {
+      var star = document.createElement("div");
+      star.className = "hanamaru-star";
+      star.textContent = s % 3 === 0 ? "★" : "✦";
+      star.style.setProperty("--sx", rand(11, 58) + "%");
+      star.style.setProperty("--sy", rand(8, 42) + "%");
+      star.style.setProperty("--star-size", rand(22, 42) + "px");
+      star.style.setProperty("--star-color", starColors[rand(0, starColors.length - 1)]);
+      star.style.setProperty("--delay", rand(0, 520) + "ms");
+      scene.insertBefore(star, scene.firstChild);
+      (function(node) {
+        setTimeout(function(){ if (node.parentNode) node.parentNode.removeChild(node); }, 2200);
+      })(star);
     }
   }
 
@@ -2287,12 +2465,27 @@
     }
   }
 
+  function nextSmashFloor() {
+    if (!session) return 4;
+    return Math.max(0, 4 - session.correctParts);
+  }
+
+  function topStandingFloor(scene) {
+    if (!scene) return nextSmashFloor();
+    var floors = scene.querySelectorAll(".building-floor:not(.broken)");
+    var top = -1;
+    for (var i = 0; i < floors.length; i++) {
+      top = Math.max(top, Number(floors[i].getAttribute("data-floor")));
+    }
+    return top >= 0 ? top : nextSmashFloor();
+  }
+
   function handleSceneSmash() {
     if (!session || !session.smashReady || session.pendingSmashPart === null) return;
-    var part = session.pendingSmashPart;
+    var scene = $("gameArtScene");
+    var part = topStandingFloor(scene);
     session.smashReady = false;
     session.pendingSmashPart = null;
-    var scene = $("gameArtScene");
     if (scene) scene.classList.remove("smash-ready");
     smashBuilding(part, session.pendingSmashExplain || "");
   }
@@ -2322,6 +2515,7 @@
       addRubble(scene, partIndex);
       playEffect("smash");
       session.correctParts++;
+      if (session.correctParts >= session.targetParts) addSkyHanamaru(scene);
       renderDots();
       $("feedback").textContent = praiseText() + "　鉄球で ビルを こわせた！　" + explainText;
       afterAnswerComplete();
@@ -2795,7 +2989,7 @@
     recordAnswer(q, ok);
 
     if (ok) {
-      var part = 4 - session.correctParts;
+      var part = nextSmashFloor();
       session.correctInSession++;
       session.pendingSmashPart = part;
       session.pendingSmashExplain = q.explain;
@@ -2805,7 +2999,7 @@
         aimWreckingBall(scene, part);
         scene.classList.add("smash-ready");
       }
-      $("feedback").textContent = praiseText() + "　鉄球を タップして ビルを こわそう！";
+      $("feedback").textContent = praiseText() + "　鉄球を タップして、上から 1だんずつ こわそう！";
       playEffect("correct");
       sparkle();
     } else {
@@ -2851,6 +3045,8 @@
 
     renderTheme("finishArt", session.theme, session.correctParts, session.colors);
     if (session.correctParts >= 5) {
+      addHanamaruFireworks($("finishArtScene"));
+      playEffect("hanamaru");
       $("finishTitle").textContent = "ぜんぶ こわせた！ はなまる！";
       $("finishText").textContent = session.attempts + "もん がんばったよ。ビルこわし だいせいこう。";
       playEffect("finish");
